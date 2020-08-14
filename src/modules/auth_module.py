@@ -10,7 +10,7 @@ class AuthModule(ModuleInterface):
     last_log_entry = self.config.get('last_log_entry', None)
 
     info = subprocess.run(
-      "cat /var/log/auth.log | egrep \"pam_unix\" | egrep \"session opened\" | tail -n 10",
+      "cat /var/log/auth.log | egrep \"pam_unix\" | egrep \"session opened\" | egrep \"sshd|su\" | tail -n 10",
       shell=True,
       stdout=subprocess.PIPE
     )
