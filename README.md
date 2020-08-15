@@ -40,6 +40,29 @@ And add the following:
 @reboot cd /path/to/breachify; python3 src/bot.py
 ```
 
+### Systemd
+Create a `breachify.service` file in `/etc/systemd/system` that looks something like this:
+```bash
+[Unit]
+Description=Breachify Notification Bot
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+WorkingDirectory=/path/to/Breachify/dir
+ExecStart=/usr/bin/env python3 src/bot.py
+
+[Install]
+WantedBy=multi-user.target
+```
+
+And make sure to enable it if you want to start on boot:  
+`systemctl enable breachify`
+
 ## Configure Modules
 
 ### Schedules
