@@ -37,8 +37,6 @@ class NotifyBot:
 
   def _configure_bot(self):
     self.updater = Updater(self.config['api_token'], use_context=True, user_sig_handler=self._shutdown)
-    self.updater.start_polling()
-    print('Started Polling')
 
   def _configure_logger(self):
     # Enable logging
