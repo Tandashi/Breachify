@@ -65,7 +65,33 @@ And make sure to enable it if you want to start on boot:
 
 ## Configure Modules
 
+| Module Name            | Option            | type   | Description                                                  | Example                                                      |
+| ---------------------- | ----------------- | ------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| auth_module.AuthModule | filter            | array  | The filter to apply                                          | [<br />`"grep \"pam_unix\""`,<br />`"grep \"session opened\""`<br />] |
+| mail_module.MailModule | pflogsumm_command | string | The full command to execute pflogsumm with inclunding the path to pflogsumm | `/usr/local/bin/pflogsumm -d yesterday`                      |
+
+
+
+
+
 ### Schedules
+For scheduling beachify uses the [schedule](https://pypi.org/project/schedule/) python library.
+To schedule a module run all you have to do is add the propertie or method name as key and the method value as the keys value. If you want to use a properties like "moneday" simply set the value to null.
+So if you want to run a module every monday at 10:12 am you would create it like this:
+```json
+{
+  "monday": null,
+  "at": "10:12"
+}
+```
+
+or if you want to run a module every 10 minutes you would do it like this:
+```json
+{
+  "minutes": null,
+  "every": 10
+}
+```
 
 ## Create new Modules
 
