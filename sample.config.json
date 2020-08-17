@@ -4,6 +4,12 @@
     "modules": [
         {
           "name": "auth_module.AuthModule",
+          "filter": [
+            "egrep \"pam_unix\"",
+            "egrep \"session opened\"",
+            "egrep \"sshd|su\"",
+            "tail -n 10"
+          ],
           "schedule": {
             "every": 1,
             "minutes": null

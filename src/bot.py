@@ -48,11 +48,11 @@ class NotifyBot:
 
   def send_message(self, module, message, part=None, of=None):
     if len(message) <= 4000 and part is None:
-      text = """
-        *\\[{name}\\]* on *{server}*:
-
-        ```{message}```
-      """.format(name=module.name, message=message, server=self.config['server'])
+      text = "*\\[{name}\\]* on *{server}*:\n```{message}```".format(
+        name=module.name,
+        message=message,
+        server=self.config['server']
+      )
 
       self.updater.bot.send_message(
         chat_id=self.config['chat_id'],
@@ -69,11 +69,13 @@ class NotifyBot:
         i += 1
 
     elif part is not None:
-      text = """
-        *\\[{name}\\]* on *{server}* \\({part} / {of}\\):
-
-        ```{message}```
-      """.format(name=module.name, message=message, server=self.config['server'], part=part, of=of)
+      text = "*\\[{name}\\]* on *{server}* \\({part} / {of}\\):\n```{message}```".format(
+        name=module.name,
+        message=message,
+        server=self.config['server'],
+        part=part,
+        of=of
+      )
       self.updater.bot.send_message(
         chat_id=self.config['chat_id'],
         text=text,

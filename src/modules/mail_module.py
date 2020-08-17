@@ -8,7 +8,7 @@ class MailModule(ModuleInterface):
 
   def execute(self):
     info = subprocess.run(
-      "cat /var/log/mail.log | " + self.config['pflogsumm_command'],
+      "cat /var/log/mail.log | " + self.config.get('pflogsumm_command', 'echo'),
       shell=True,
       stdout=subprocess.PIPE
     )

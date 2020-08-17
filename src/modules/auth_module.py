@@ -10,7 +10,7 @@ class AuthModule(ModuleInterface):
     last_log_entry = self.config.get('last_log_entry', None)
 
     info = subprocess.run(
-      "cat /var/log/auth.log | egrep \"pam_unix\" | egrep \"session opened\" | egrep \"sshd|su\" | tail -n 10",
+      "cat /var/log/auth.log | " + " | ".join(self.config.get("filter", 'echo')),
       shell=True,
       stdout=subprocess.PIPE
     )
@@ -34,7 +34,7 @@ class AuthModule(ModuleInterface):
         last_log_entry = line
         message += line + "\n"
 
-    if not found_last_entry:
+    if not found_last_entry and len(lines) > 0:
       message = '\n'.join(lines)
       last_log_entry = lines[-1]
 
