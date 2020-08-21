@@ -3,8 +3,10 @@ import threading
 import time
 
 class Scheduler:
-  def __init__(self, modules):
-    for module in modules:
+  def __init__(self, notifier):
+    self.notifier = notifier
+
+    for module in notifier.modules:
       schedule_config = module.config['schedule']
       schedule_job = schedule.every(schedule_config.get('every', 1))
 
@@ -43,8 +45,11 @@ class Scheduler:
       @classmethod
       def run(cls):
         while not cease_continuous_run.is_set():
-          schedule.run_pending()
-          time.sleep(interval)
+          try:
+            schedule.run_pending()
+            time.sleep(interval)
+          except Exception as e:
+            self.notifier.logger.error('Could not run pending jobs: %s' % str(e))
 
     continuous_thread = ScheduleThread()
     continuous_thread.start()
