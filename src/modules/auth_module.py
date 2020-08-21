@@ -10,7 +10,7 @@ class AuthModule(ModuleInterface):
     last_log_entry = self.config.get('last_log_entry', None)
 
     info = subprocess.run(
-      "cat /var/log/auth.log | " + " | ".join(self.config.get("filter", 'echo')),
+      "cat /var/log/auth.log | " + " | ".join(self.config.get("filter", ['echo'])),
       shell=True,
       stdout=subprocess.PIPE
     )
