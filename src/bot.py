@@ -3,6 +3,7 @@ from util import storage, scheduler
 
 import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from modules.module_interface import ModuleInterface
 
 class NotifyBot:
 
@@ -18,6 +19,7 @@ class NotifyBot:
 
   def start(self):
     self.logger.info('Starting Notifier')
+    self._send_system_message('Bip Bup. I am now running! :)')
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
@@ -28,7 +30,7 @@ class NotifyBot:
       self.config = self.storage.load_config()
     except Exception as e:
       self.logger.error('Could not load config file: %s' % str(e))
-      exit(1)
+      self._shutdown()
 
   def _configure_scheduler(self):
     try:
@@ -37,7 +39,7 @@ class NotifyBot:
       self.scheduler.run_continuously()
     except Exception as e:
       self.logger.error('Could not configure scheduler: %s' % str(e))
-      exit(1)
+      self._shutdown()
 
   def _load_modules(self):
     self.modules = []
@@ -53,32 +55,32 @@ class NotifyBot:
 
   def _configure_bot(self):
     try:
-      self.updater = Updater(self.config['api_token'], use_context=True, user_sig_handler=self._shutdown)
+      self.updater = Updater(self.config['api_token'], use_context=True)
     except:
       self.logger.error('Could not connect to the Telegram API')
-      exit(1)
+      self._shutdown()
 
   def _configure_logger(self):
     # Enable logging
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
     self.logger = logging.getLogger(__name__)
 
-  def _shutdown(self, _, __):
+  def _shutdown(self, _=None, __=None):
     self.scheduler.shutdown()
+    self._send_system_message('Bip Bup. Shutting down... :(')
 
-  def send_message(self, module, message, part=None, of=None):
+  def _send_system_message(self, message, part=None, of=None):
+    self.send_message(ModuleInterface('System', self, {}), message, part, of)
+
+  def send_message(self, module, message, part=None, of=None, parse_mode=telegram.ParseMode.MARKDOWN_V2):
     try:
+      text = None
+
       if len(message) <= 4000 and part is None:
-        text = "*\\[{name}\\]* on *{server}*:\n```{message}```".format(
+        text = "*\\[{name}\\]* on *{server}*:\n```\n{message}\n```".format(
           name=module.name,
           message=message,
           server=self.config['server']
-        )
-
-        self.updater.bot.send_message(
-          chat_id=self.config['chat_id'],
-          text=text,
-          parse_mode=telegram.ParseMode.MARKDOWN_V2
         )
 
       elif len(message) > 4000 and part is None:
@@ -90,20 +92,28 @@ class NotifyBot:
           i += 1
 
       elif part is not None:
-        text = "*\\[{name}\\]* on *{server}* \\({part} / {of}\\):\n```{message}```".format(
+        text = "*\\[{name}\\]* on *{server}* \\({part} / {of}\\):\n```\n{message}\n```".format(
           name=module.name,
           message=message,
           server=self.config['server'],
           part=part,
           of=of
         )
+
+      if text is not None:
         self.updater.bot.send_message(
           chat_id=self.config['chat_id'],
           text=text,
-          parse_mode=telegram.ParseMode.MARKDOWN_V2
+          parse_mode=parse_mode
         )
     except Exception as e:
       self.logger.error('Could not send message: %s' % str(e))
 
 bot = NotifyBot()
-bot.start()
+
+try:
+  bot.start()
+except:
+  bot._shutdown()
+
+bot._shutdown()
