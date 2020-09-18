@@ -24,6 +24,7 @@ cp sample.config.json config.json
 And change the API Token and Chat Id. To get your API Token create a new Telegram. A Guide how to do that can be found [here](https://core.telegram.org/bots).
 To find out your Chat Id you can use the [userinfobot](https://telegram.me/userinfobot).
 
+Now start the chat with the bot once so the chat is created and the bot can find it over the id.
 
 After that you start the bot as followes:
 ```bash
