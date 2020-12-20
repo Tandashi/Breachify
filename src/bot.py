@@ -5,9 +5,15 @@ import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from modules.module_interface import ModuleInterface
 
+"""
+The Core Class of this project. It contains the Bot logic.
+"""
 class NotifyBot:
 
   def __init__(self):
+    """
+    Initialize the Bot
+    """
     self._configure_logger()
         
     self.storage = storage.Storage()
@@ -18,6 +24,9 @@ class NotifyBot:
     self._configure_scheduler()
 
   def start(self):
+    """
+    Starts the Bot and sends out the start message
+    """
     self.logger.info('Starting Notifier')
     self._send_system_message('Bip Bup. I am now running! :)')
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
@@ -26,6 +35,11 @@ class NotifyBot:
     self.updater.idle()
 
   def _load_config(self):
+    """
+    Loads the Bot configuration file
+
+    On fail it will call `self._shutdown`
+    """
     try:
       self.config = self.storage.load_config()
     except Exception as e:
@@ -33,6 +47,12 @@ class NotifyBot:
       self._shutdown()
 
   def _configure_scheduler(self):
+    """
+    Configures the scheduler and start it.
+
+    On fail it will call `self._shutdown`
+    """
+    
     try:
       self.scheduler = scheduler.Scheduler(self)
       # Start Jobs
@@ -42,6 +62,10 @@ class NotifyBot:
       self._shutdown()
 
   def _load_modules(self):
+    """
+    Loads the different modules and initializes them
+    """
+
     self.modules = []
 
     for module_config in self.config.get('modules', []):
@@ -54,6 +78,10 @@ class NotifyBot:
         self.logger.error('Could not load module: ' + module_config.get('name', 'No name provided.'))
 
   def _configure_bot(self):
+    """
+    Configure the Bot and connect to the Telegram API
+    """
+    
     try:
       self.updater = Updater(self.config['api_token'], use_context=True)
     except:
@@ -61,21 +89,53 @@ class NotifyBot:
       self._shutdown()
 
   def _configure_logger(self):
+    """
+    Configure the Logger
+    """
     # Enable logging
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
     self.logger = logging.getLogger(__name__)
 
   def _shutdown(self, _=None, __=None):
+    """
+    Shutdown the Bot. Will cancel all running schelduled jobs
+    and sends out a shutdown message.
+    """
+
     self.scheduler.shutdown()
     self._send_system_message('Bip Bup. Shutting down... :(')
 
-  def _send_system_message(self, message, part=None, of=None):
-    self.send_message(ModuleInterface('System', self, {}), message, part, of)
+  def _send_system_message(self, message, parse_mode=telegram.ParseMode.MARKDOWN_V2):
+    """
+    Sends a system message
+
+    Keyword arguments:
+    message -- the message that should be send
+    parse_mode -- the mode how the message should be parsed (Default: ParseMode.MARKDOWN_V2)
+    """
+    self.send_message(ModuleInterface('System', self, {}), message, parse_mode=parse_mode)
 
   def send_message(self, module, message, part=None, of=None, parse_mode=telegram.ParseMode.MARKDOWN_V2):
+    """
+    Sends out a message. If the message is longer then 4000 characters
+    it automatically cuts it into multiple parts.
+
+    Keyword arguments:
+    module -- the module that sends the message
+    message -- the message that should be send
+    part -- the part number (Default: None)
+    of -- the total amount of parts. Needs to be set if part is not None (Default: None)
+    parse_mode -- the mode how the message should be parsed (Default: ParseMode.MARKDOWN_V2)
+    """
+    
     try:
       text = None
 
+      if (part is not None and of is None):
+        raise Exception("'part' was set but 'of' wasn't.")
+
+      # If the message doesn't need to be partitioned and isn't a part
+      # we can just send it
       if len(message) <= 4000 and part is None:
         text = "*\\[{name}\\]* on *{server}*:\n```\n{message}\n```".format(
           name=module.name,
@@ -83,12 +143,16 @@ class NotifyBot:
           server=self.config['server']
         )
 
+      # Message is to long and wasn't partitioned beforehand
+      # so we need to do it
       elif len(message) > 4000 and part is None:
+        # calculate the parts
         parts = [message[i : i + 4000] for i in range(0, len(message), 4000)]
 
         i = 1
         for part in parts:
-          self.send_message(module, part, i, len(parts))
+          # Send all the parts
+          self.send_message(module, part, i, len(parts), parse_mode)
           i += 1
 
       elif part is not None:
@@ -101,6 +165,7 @@ class NotifyBot:
         )
 
       if text is not None:
+        # Send the message to the chat
         self.updater.bot.send_message(
           chat_id=self.config['chat_id'],
           text=text,
