@@ -29,10 +29,16 @@ class Scheduler:
       schedule_job.do(module.execute)
 
   def run_continuously(self, interval=1):
-    """Continuously run, while executing pending jobs at each elapsed
+    """
+    Continuously run, while executing pending jobs at each elapsed
     time interval.
+
+    Keywords arguments:
+    interval -- the interval in seconds at which the jobs should be checked (Default: 1)
+
     @return cease_continuous_run: threading.Event which can be set to
     cease continuous run.
+    
     Please note that it is *intended behavior that run_continuously()
     does not run missed jobs*. For example, if you've registered a job
     that should run every minute and you set a continuous run interval
