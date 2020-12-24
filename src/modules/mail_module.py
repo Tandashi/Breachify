@@ -22,8 +22,8 @@ threshold_messages = [
 threshold_message_regex = { re.sub(r'[\s*\/]', "_", key): create_message_count_regex(key) for key in threshold_messages }
 
 class MailModule(ModuleInterface):
-  def __init__(self, notifier, config):
-    super().__init__('Mail Module', notifier, config)
+  def __init__(self, notifier, config, data):
+    super().__init__('Mail Module', notifier, config, data)
 
   def execute(self):
     should_send_message = False

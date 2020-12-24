@@ -1,9 +1,11 @@
 import logging
-from util import storage, scheduler
+from util import scheduler
 
 import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater
 from modules.module_interface import ModuleInterface
+from util.config_loader import ConfigLoader
+from util.storage import Storage
 
 """
 The Core Class of this project. It contains the Bot logic.
@@ -16,7 +18,8 @@ class NotifyBot:
     """
     self._configure_logger()
         
-    self.storage = storage.Storage()
+    self.storage = Storage
+    self._load_data()
     self._load_config()
 
     self._configure_bot()
@@ -34,6 +37,13 @@ class NotifyBot:
     # start_polling() is non-blocking and will stop the bot gracefully.
     self.updater.idle()
 
+  def _load_data(self):
+    try:
+      self.data = self.storage.load_data()
+    except Exception as e:
+      self.logger.error('Could not load data file: %s' % str(e))
+      self._shutdown()
+
   def _load_config(self):
     """
     Loads the Bot configuration file
@@ -41,7 +51,7 @@ class NotifyBot:
     On fail it will call `self._shutdown`
     """
     try:
-      self.config = self.storage.load_config()
+      self.config = ConfigLoader.load_config()
     except Exception as e:
       self.logger.error('Could not load config file: %s' % str(e))
       self._shutdown()
@@ -73,7 +83,13 @@ class NotifyBot:
         names = module_config['name'].split('.')
         mod = __import__('modules.' + names[0], fromlist=names[1])
         module_class = getattr(mod, names[1])
-        self.modules.append(module_class(notifier=self, config=module_config))
+        self.modules.append(
+          module_class(
+            notifier=self,
+            config=module_config,
+            data=self.data.get(module_config['name'], {})
+          )
+        )
       except:
         self.logger.error('Could not load module: ' + module_config.get('name', 'No name provided.'))
 
@@ -96,6 +112,9 @@ class NotifyBot:
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
     self.logger = logging.getLogger(__name__)
 
+  def update_module_data(self, data):
+    self.storage.update_module_data(data, self.data)
+
   def _shutdown(self, _=None, __=None):
     """
     Shutdown the Bot. Will cancel all running schelduled jobs
@@ -105,7 +124,7 @@ class NotifyBot:
     self.scheduler.shutdown()
     self._send_system_message('Bip Bup. Shutting down... :(')
 
-  def _send_system_message(self, message, parse_mode=telegram.ParseMode.MARKDOWN_V2):
+  def _send_system_message(self, message, part=None, of=None):
     """
     Sends a system message
 
@@ -113,7 +132,7 @@ class NotifyBot:
     message -- the message that should be send
     parse_mode -- the mode how the message should be parsed (Default: ParseMode.MARKDOWN_V2)
     """
-    self.send_message(ModuleInterface('System', self, {}), message, parse_mode=parse_mode)
+    self.send_message(ModuleInterface('System', self, {'name': 'system'}), message, part, of)
 
   def send_message(self, module, message, part=None, of=None, parse_mode=telegram.ParseMode.MARKDOWN_V2):
     """
