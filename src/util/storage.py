@@ -32,7 +32,4 @@ class Storage:
       new_data.append(module_data)
 
     data = new_data
-
-    print("Data before Write:")
-    print(data)
     Storage.write_data(new_data)
