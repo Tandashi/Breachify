@@ -42,7 +42,4 @@ class AuthModule(ModuleInterface):
       self.notifier.send_message(self, message)
 
     self.data['last_log_entry'] = last_log_entry
-
-    print(self.data)
-
     self.notifier.update_module_data(self.data)
