@@ -3,11 +3,11 @@ from modules.module_interface import ModuleInterface
 
 class AuthModule(ModuleInterface):
 
-  def __init__(self, notifier, config):
-    super().__init__('Auth Module', notifier, config)
+  def __init__(self, notifier, config, data):
+    super().__init__('Auth Module', notifier, config, data)
 
   def execute(self):
-    last_log_entry = self.config.get('last_log_entry', None)
+    last_log_entry = self.data.get('last_log_entry', None)
 
     info = subprocess.run(
       "cat /var/log/auth.log | " + " | ".join(self.config.get("filter", ['echo'])),
@@ -41,5 +41,8 @@ class AuthModule(ModuleInterface):
     if message:
       self.notifier.send_message(self, message)
 
-    self.config['last_log_entry'] = last_log_entry
-    self.notifier.storage.update_module_config(self.config, self.notifier.config)
+    self.data['last_log_entry'] = last_log_entry
+
+    print(self.data)
+
+    self.notifier.update_module_data(self.data)

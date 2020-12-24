@@ -1,24 +1,38 @@
 import json
 
 class Storage:
-  def write_config(self, config):
+  def write_data(config):
     json_dump = json.dumps(config, sort_keys=True, indent=4)
   
-    with open('config.json', 'w') as f:
+    with open('data.json', 'w') as f:
       f.write(json_dump)
 
-  def load_config(self):
-    with open('config.json', 'r') as f:
-      content = f.read()
-      return json.loads(content)
+  def load_data():
+    try:
+      with open('data.json', 'r') as f:
+        content = f.read()
+        return json.loads(content)
+    except:
+      return {}
 
-  def update_module_config(self, module_config, config):
-    new_modules_config = []
-    for module in config['modules']:
-      if module['name'] == module_config['name']:
-        new_modules_config.append(module_config)
+  def update_module_data(module_data, data):
+    replaced_data = False
+
+    new_data = []
+    for module in data:
+      if module['name'] == module_data['name']:
+        new_data.append(module_data)
+        replaced_data = True
       else:
-        new_modules_config.append(module)
+        new_data.append(module)
 
-    config['modules'] = new_modules_config
-    self.write_config(config)
+    # If we haven't replaced the data then we need to
+    # create the entry because it didn't exist yet
+    if (replaced_data == False):
+      new_data.append(module_data)
+
+    data = new_data
+
+    print("Data before Write:")
+    print(data)
+    Storage.write_data(new_data)

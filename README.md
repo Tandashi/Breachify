@@ -19,7 +19,7 @@ pip3 install -r requirements.txt
 
 Now you can create the configuration as follows:
 ```bash
-cp sample.config.json config.json
+cp sample.config.yaml config.yaml
 ```
 And change the API Token and Chat Id. To get your API Token create a new Telegram. A Guide how to do that can be found [here](https://core.telegram.org/bots).
 To find out your Chat Id you can use the [userinfobot](https://telegram.me/userinfobot).
