@@ -65,16 +65,6 @@ And make sure to enable it if you want to start on boot:
 `systemctl enable breachify`
 
 ## Configure Modules
-
-| Module Name            | Option            | type   | Description                                                  | Example                                               |
-| ---------------------- | ----------------- | ------ | ------------------------------------------------------------ | ----------------------------------------------------- |
-| auth_module.AuthModule | filter            | array  | The filter to apply                                          | ```["grep \"pam_unix\"","grep \"session opened\""]``` |
-| mail_module.MailModule | pflogsumm_command | string | The full command to execute pflogsumm with inclunding the path to pflogsumm | `/usr/local/bin/pflogsumm -d yesterday`               |
-
-
-
-
-
 ### Schedules
 For scheduling breachify uses the [schedule](https://pypi.org/project/schedule/) python library.
 To schedule a module run all you have to do is add the property or method name as key and the method value as the keys value. If you want to use a properties like `monday` simply set the value to `null`.
@@ -94,8 +84,6 @@ or if you want to run a module every 10 minutes you would do it like this:
   "every": 10
 }
 ```
-
-## Create new Modules
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
