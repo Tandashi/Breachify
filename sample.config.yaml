@@ -1,23 +1,42 @@
+# The name of the server to identify from where
+# the messages are coming if running
+# on mutliple servers
 server: SERVER NAME
 
+# Telegram API Token
 api_token: 'TOKEN'
+# Telegram chat id
 chat_id: -1
 
+# Configuration for the different modules
 modules:
+  # Authentication Module
+  # Will check if there is a new entry in the /var/log/auth.log
+  # and will notify you if there is
   - name: auth_module.AuthModule
+    # Filter for the /var/log/auth.log
     filter:
       - egrep "pam_unix"
       - egrep "session opened"
       - egrep "sshd|su"
       - tail -n 10
+    # Schedule when the module should be run
+    # In this example every minute
     schedule:
       every: 1
       minutes: null
+  
+  # Mail Module
   - name: mail_module.MailModule
+    # Schedule when the module should be run
+    # In this example every day at 00:00
     schedule:
       every: 1
       at: '00:00'
       day: null
+    # Theresholds when you should be notified about your mails
+    # Remove if you always want to be notified or set one value to 0
+    # Only set those that you want to threshold. Remove the rest.
     thresholds:
       received: 0
       delivered: 0
@@ -34,4 +53,5 @@ modules:
       sending_hosts_domains: 0
       recipents: 0
       recipient_hosts_domains: 0
+    # The pflogsumm command that should be run to get the mail log
     pflogsumm_command: /usr/local/bin/pflogsumm -d yesterday
