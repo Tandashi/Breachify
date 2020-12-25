@@ -43,7 +43,7 @@ And add the following:
 
 ### Systemd
 Create a `breachify.service` file in `/etc/systemd/system` that looks something like this:
-```bash
+```ini
 [Unit]
 Description=Breachify Notification Bot
 After=network.target
