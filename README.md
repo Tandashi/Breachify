@@ -70,19 +70,17 @@ For scheduling breachify uses the [schedule](https://pypi.org/project/schedule/)
 To schedule a module run all you have to do is add the property or method name as key and the method value as the keys value. If you want to use a properties like `monday` simply set the value to `null`.
 So if you want to run a module every Monday at `10:12 am` you would create it like this:
 
-```json
-{
-  "monday": null,
-  "at": "10:12"
-}
+```yaml
+schedule:
+  monday: null
+  at: '10:12'
 ```
 
 or if you want to run a module every 10 minutes you would do it like this:
-```json
-{
-  "minutes": null,
-  "every": 10
-}
+```yaml
+schedule:
+  minutes: null
+  every: 10
 ```
 
 ## Contributing
