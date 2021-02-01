@@ -13,6 +13,21 @@ class Storage:
     with open('data.json', 'w') as f:
       f.write(json_dump)
 
+  def get_module_data(name, data):
+    """
+    Get the modules data from the data
+
+    Keyargs:
+    name - the module name
+    data - the data to get the modules data from
+
+    returns: the modules data or an empty object if not found
+    """
+    for module in data:
+      if(module['name'] == name):
+        return module
+    return {}
+
   def load_data():
     """
     Loads the data from the data.json file

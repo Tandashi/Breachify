@@ -87,7 +87,7 @@ class NotifyBot:
           module_class(
             notifier=self,
             config=module_config,
-            data=self.data.get(module_config['name'], {})
+            data=self.storage.get_module_data(module_config['name'], self.data)
           )
         )
       except:
