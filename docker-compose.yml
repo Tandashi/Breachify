@@ -1,0 +1,10 @@
+version: '3'
+services:
+  backend:
+    container_name: 'Breachify'
+    image: 'breachify:latest'
+    build: .
+  
+    # volumes:
+    #   - /opt/breachify/config.yaml:/breachify/config.yaml
+    #   - /var/log/auth.log:/var/log/auth.log:ro
